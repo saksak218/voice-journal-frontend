@@ -44,7 +44,7 @@ export function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
     try {
-      const decodedToken = jwtDecode(adminToken);
+      const decodedToken = jwtDecode<{ role?: string }>(adminToken);
       if (decodedToken?.role !== "admin") {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
