@@ -1,4 +1,3 @@
-import { request } from "http";
 import { jwtDecode } from "jwt-decode";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -26,7 +25,7 @@ export function proxy(request: NextRequest) {
 
   // If trying to access protected route without refresh token
   if (isProtectedRoute && !refreshToken) {
-    const loginUrl = new URL("/login", request.url);
+    const loginUrl = new URL("/register", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
