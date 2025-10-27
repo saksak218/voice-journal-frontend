@@ -1,5 +1,4 @@
 // types/auth.ts
-
 export interface User {
   id: string;
   email: string;
@@ -10,28 +9,18 @@ export interface User {
 
 export interface AuthResponse {
   success: boolean;
-  message?: string;
   data?: {
     user: User;
     accessToken: string;
+    refreshToken: string;
+    adminToken?: string;
   };
+  message?: string;
 }
 
-export interface ErrorResponse {
-  success: false;
-  message: string;
+export interface AuthResult {
+  success: boolean;
   error?: string;
-}
-
-export interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-}
-
-export interface LoginData {
-  email: string;
-  password: string;
 }
 
 export interface AuthContextType {
@@ -46,9 +35,4 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   isAdmin: boolean;
-}
-
-export interface AuthResult {
-  success: boolean;
-  error?: string;
 }
