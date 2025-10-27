@@ -5,9 +5,23 @@ import type { NextRequest } from "next/server";
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // 🔍 DEBUG: Add logging (remove in production)
+  const isDev = process.env.NODE_ENV === "development";
+  if (isDev) {
+    console.log("=== MIDDLEWARE DEBUG ===");
+    console.log("Path:", pathname);
+    console.log("All cookies:", request.cookies.getAll());
+  }
+
   // Get tokens from cookies
   const refreshToken = request.cookies.get("refreshToken")?.value;
   const adminToken = request.cookies.get("adminToken")?.value;
+
+  if (isDev) {
+    console.log("refreshToken exists:", !!refreshToken);
+    console.log("adminToken exists:", !!adminToken);
+    console.log("========================");
+  }
 
   // Public routes that don't require authentication
   const publicRoutes = ["/login", "/register", "/"];
@@ -39,7 +53,7 @@ export function proxy(request: NextRequest) {
   // Additional check for admin routes: verify role from access token
   if (isAdminRoute && refreshToken) {
     if (!adminToken) {
-      // No access token, redirect to login
+      // No admin token, redirect to dashboard
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
     try {
@@ -48,6 +62,7 @@ export function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     } catch (error) {
+      console.error("Token decode error:", error);
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(loginUrl);
@@ -63,7 +78,16 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  // Create response with debug headers
+  const response = NextResponse.next();
+
+  // 🔍 DEBUG: Add headers for browser inspection
+  if (isDev) {
+    response.headers.set("X-Has-Refresh-Token", String(!!refreshToken));
+    response.headers.set("X-Has-Admin-Token", String(!!adminToken));
+  }
+
+  return response;
 }
 
 export const config = {
